@@ -1,0 +1,270 @@
+/* ============================================================
+   Tellor Defense - CRT Monitor Frame & Retro Styles
+   ============================================================ */
+
+/* --- Reset & Base --- */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #0a0a0a;
+    font-family: 'Press Start 2P', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- CRT Container (outermost wrapper) --- */
+
+.crt-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 800px;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* --- CRT Bezel (the plastic monitor shell) --- */
+
+.crt-bezel {
+    position: relative;
+    background: linear-gradient(160deg, #d0d0d0 0%, #c0c0c0 20%, #a8a8a8 50%, #a0a0a0 80%, #909090 100%);
+    padding: 32px 36px 20px;
+    border-radius: 20px;
+    box-shadow:
+        /* outer 3D bevel highlight (top-left) */
+        -3px -3px 0 0 #e0e0e0,
+        /* outer 3D bevel shadow (bottom-right) */
+        3px 3px 0 0 #707070,
+        /* broader soft shadow underneath */
+        0 8px 30px rgba(0, 0, 0, 0.7),
+        /* subtle ambient glow */
+        0 0 60px rgba(0, 0, 0, 0.4);
+    /* inner bevel effect via border */
+    border-top: 2px solid #e8e8e8;
+    border-left: 2px solid #dcdcdc;
+    border-right: 2px solid #888;
+    border-bottom: 2px solid #787878;
+}
+
+/* --- CRT Screen (the display area) --- */
+
+.crt-screen {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background-color: #000000;
+    /* green-tinted vignette glow on the screen edge */
+    box-shadow:
+        inset 0 0 40px rgba(0, 255, 80, 0.08),
+        inset 0 0 80px rgba(0, 0, 0, 0.5),
+        /* outer glow from the screen onto the bezel */
+        0 0 15px rgba(0, 255, 80, 0.06);
+    /* slight curvature illusion */
+    border: 3px solid #1a1a1a;
+}
+
+/* subtle green reflection / glow overlay on the glass */
+.crt-screen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    border-radius: 8px;
+    background: radial-gradient(
+        ellipse at 30% 20%,
+        rgba(255, 255, 255, 0.03) 0%,
+        transparent 60%
+    );
+    z-index: 3;
+}
+
+/* --- Game Canvas --- */
+
+#gameCanvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background-color: #000000;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* --- Scanlines Overlay --- */
+
+.scanlines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.3) 2px,
+        rgba(0, 0, 0, 0.3) 4px
+    );
+}
+
+/* --- CRT Screen Border (inner shadow frame) --- */
+
+.crt-screen-border {
+    position: absolute;
+    top: 32px;
+    left: 36px;
+    right: 36px;
+    /* height matches the screen; positioned behind via z-index */
+    bottom: 0;
+    pointer-events: none;
+    border-radius: 10px;
+    /* this element sits behind the screen to add depth but
+       we use it purely for structural reference if needed */
+    z-index: 0;
+}
+
+/* --- Ticker Bar (price feed below screen) --- */
+
+.ticker-bar {
+    margin-top: 10px;
+    width: 100%;
+    height: 22px;
+    background-color: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 3px;
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.ticker-text {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 8px;
+    color: #00ff55;
+    padding-left: 100%;
+    animation: marquee 18s linear infinite;
+    text-shadow: 0 0 4px rgba(0, 255, 80, 0.5);
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* --- CRT Base (monitor stand / bottom) --- */
+
+.crt-base {
+    position: relative;
+    width: 340px;
+    height: 28px;
+    background: linear-gradient(180deg, #a0a0a0 0%, #888 40%, #777 100%);
+    border-radius: 0 0 10px 10px;
+    border-top: 1px solid #b0b0b0;
+    border-left: 2px solid #aaa;
+    border-right: 2px solid #777;
+    border-bottom: 2px solid #666;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ventilation / detail ridge on the base */
+.crt-base-detail {
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #666 20%, #666 80%, transparent 100%);
+    border-radius: 2px;
+}
+
+/* power LED indicator */
+.crt-base::after {
+    content: '';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #00ff44;
+    box-shadow:
+        0 0 4px #00ff44,
+        0 0 8px rgba(0, 255, 68, 0.5);
+}
+
+/* --- Screen Curvature Enhancement --- */
+
+/* Additional curvature illusion via a gradient overlay on the screen edges */
+.crt-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    border-radius: 8px;
+    z-index: 4;
+    box-shadow:
+        inset 0 0 100px rgba(0, 0, 0, 0.25);
+}
+
+/* --- Responsive Adjustments --- */
+
+@media (max-height: 700px) {
+    .crt-bezel {
+        padding: 20px 24px 14px;
+        border-radius: 14px;
+    }
+
+    .crt-screen {
+        border-radius: 8px;
+    }
+
+    .crt-base {
+        height: 22px;
+        width: 280px;
+    }
+}
+
+@media (max-width: 850px) {
+    .crt-container {
+        width: 95vw;
+    }
+
+    .crt-bezel {
+        padding: 20px 22px 14px;
+        border-radius: 14px;
+    }
+
+    .crt-base {
+        width: 260px;
+    }
+
+    .ticker-text {
+        font-size: 7px;
+    }
+}
