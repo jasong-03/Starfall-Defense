@@ -1,0 +1,15 @@
+# Private inputs (witness)
+prices = [1558, 231, 205400, 20000000, 50000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+token_types = [0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+player_shot = [false, true, false, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+num_active = 5
+
+# Public inputs
+real_trb = 1558
+real_eth = 205400
+real_btc = 6880300
+correct_shots = 3
+incorrect_shots = 0
+missed_bad = 0
+total_data_points = 5
+game_seed = 12345

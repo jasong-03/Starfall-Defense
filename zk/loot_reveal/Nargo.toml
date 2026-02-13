@@ -1,0 +1,6 @@
+[package]
+name = "loot_reveal"
+type = "bin"
+authors = [""]
+
+[dependencies]
