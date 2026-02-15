@@ -20,5 +20,5 @@
   // Start the loop
   requestAnimationFrame(gameLoop);
 
-  console.log('Tellor Defense loaded! Click to start.');
+  console.log('Starfall Defense loaded! Click to start.');
 })();

@@ -230,6 +230,8 @@ class Game {
           var gameOver = this.buildings.takeDamage();
           this.explosions.push(new Explosion(dp.x, this.height - 60, false));
           this.audio.playExplosion();
+          // Screen shake on damage
+          if (window.screenShake) window.screenShake(gameOver ? 12 : 5);
           if (gameOver) {
             this.state = GameState.GAME_OVER;
             this.logger.logGameOver(this.hud.score, this.hud.wave);
@@ -477,7 +479,7 @@ class Game {
     ctx.fillStyle = '#00ffcc';
     ctx.textAlign = 'center';
     ctx.fillText('Welcome to', this.width / 2, this.height / 2 - 40);
-    ctx.fillText('Tellor Defense!', this.width / 2, this.height / 2);
+    ctx.fillText('Starfall Defense!', this.width / 2, this.height / 2);
 
     if (this._walletAddress) {
       // Connected — show address + click to play
