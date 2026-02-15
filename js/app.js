@@ -14,5 +14,6 @@ import './seeded-random.js';
 import './game-logger.js';
 import './loot-system.js';
 import './card-ui.js';
+import './music.js';
 import './game.js';
 import './main.js';
