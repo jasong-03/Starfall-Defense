@@ -83,7 +83,7 @@ class Game {
       self.audio.init();
       if (!self._musicInited && self.audio.ctx) {
         self.music.init(self.audio.ctx);
-        self.music.play('title');
+        self.music.play('gameplay');
         self._musicInited = true;
       }
       self._handleClick();
@@ -244,7 +244,6 @@ class Game {
             this.state = GameState.GAME_OVER;
             this.logger.logGameOver(this.hud.score, this.hud.wave);
             this.audio.playGameOver();
-            this.music.play('gameover');
             // Auto-generate ZK proof + submit on-chain
             this._autoSubmitFlow();
           }
@@ -323,9 +322,6 @@ class Game {
     this.logger.reset();
     this.logger.setSeed(seed);
 
-    // Switch to gameplay music
-    this.music.play('gameplay');
-
     // Generate ZK seed and pre-compute cards
     this.zkSeed = BigInt(seed);
     this.collectedCards = [];
@@ -358,7 +354,6 @@ class Game {
 
   _restart() {
     this.state = GameState.TITLE;
-    this.music.play('title');
     this.hud.reset();
     this.buildings.reset();
     this.logger.reset();
