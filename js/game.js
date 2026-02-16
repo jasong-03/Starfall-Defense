@@ -111,12 +111,10 @@ class Game {
   _handleClick() {
     switch (this.state) {
       case GameState.TITLE:
-        if (this._walletAddress) {
-          // Already connected — start game
-          this.state = GameState.INSTRUCTIONS;
-          this.countdown = 5;
-          this.countdownTimer = Date.now();
-        } else if (!this._walletConnecting) {
+        if (this._walletAddress && !this._startingGame) {
+          // Already connected — sign start_game TX then begin
+          this._signAndStartGame();
+        } else if (!this._walletConnecting && !this._startingGame) {
           // Connect wallet first
           this._connectWallet();
         }
@@ -317,7 +315,8 @@ class Game {
   _startNewGame() {
     var self = this;
     this.hud.wave = 1;
-    var seed = Date.now() & 0xFFFFFFFF;
+    var seed = this._pendingSeed || (Date.now() & 0xFFFFFFFF);
+    this._pendingSeed = null;
     this.rng = new SeededRandom(seed);
     this.logger.reset();
     this.logger.setSeed(seed);
@@ -490,15 +489,26 @@ class Game {
     ctx.fillText('Starfall Defense!', this.width / 2, this.height / 2);
 
     if (this._walletAddress) {
-      // Connected — show address + click to play
+      // Connected — show address
       ctx.font = '7px "Press Start 2P", monospace';
       ctx.fillStyle = '#00ff41';
       ctx.fillText('WALLET: ' + this._walletAddress.substring(0, 8) + '...' + this._walletAddress.substring(this._walletAddress.length - 4), this.width / 2, this.height / 2 + 35);
 
-      ctx.font = '12px "Press Start 2P", monospace';
-      ctx.fillStyle = '#ffffff';
-      if (Math.floor(Date.now() / 500) % 2 === 0) {
-        ctx.fillText('Click to Play', this.width / 2, this.height / 2 + 60);
+      if (this._startingGame) {
+        // Signing start_game TX
+        ctx.font = '10px "Press Start 2P", monospace';
+        ctx.fillStyle = '#ffff00';
+        var dots = '.'.repeat(Math.floor(Date.now() / 400) % 4);
+        ctx.fillText('Signing start_game' + dots, this.width / 2, this.height / 2 + 55);
+        ctx.font = '7px "Press Start 2P", monospace';
+        ctx.fillStyle = '#888888';
+        ctx.fillText('Confirm in Freighter wallet', this.width / 2, this.height / 2 + 70);
+      } else {
+        ctx.font = '12px "Press Start 2P", monospace';
+        ctx.fillStyle = '#ffffff';
+        if (Math.floor(Date.now() / 500) % 2 === 0) {
+          ctx.fillText('Click to Play', this.width / 2, this.height / 2 + 60);
+        }
       }
     } else if (this._walletConnecting) {
       // Connecting...
@@ -737,13 +747,6 @@ class Game {
       ctx.fillText(cardText, this.width / 2, this.height / 2 + 67);
     }
 
-    // Click to reboot
-    ctx.font = '10px "Press Start 2P", monospace';
-    ctx.fillStyle = '#ffffff';
-    if (Math.floor(Date.now() / 500) % 2 === 0) {
-      ctx.fillText('Click to Reboot', this.width / 2, this.height / 2 + 90);
-    }
-
     // ZK + Stellar auto-submit status
     ctx.font = '8px "Press Start 2P", monospace';
     if (this._stellarTxHash) {
@@ -825,6 +828,41 @@ class Game {
       self._walletConnecting = false;
       self._walletStatus = err.message;
       console.log('%c[Wallet] Failed: ' + err.message, 'color: #ff0000');
+    });
+  }
+
+  _signAndStartGame() {
+    var self = this;
+    if (!window.StellarWallet) {
+      this._walletStatus = 'Stellar wallet not loaded...';
+      return;
+    }
+    this._startingGame = true;
+    this._walletStatus = 'Signing start_game TX...';
+
+    // Generate seed early so we can commit it on-chain
+    var seed = Date.now() & 0xFFFFFFFF;
+    this._pendingSeed = seed;
+
+    // Use a placeholder commitment (real Poseidon2 is computed at proof time)
+    // We commit a hash of the seed for on-chain record
+    var commitmentHex = seed.toString(16).padStart(64, '0');
+
+    window.StellarWallet.startGame(commitmentHex).then(function(result) {
+      self._startingGame = false;
+      self._walletStatus = null;
+      self._stellarSessionId = result.sessionId;
+      self._stellarStartHash = result.hash;
+      console.log('%c[Game] start_game confirmed — Session #' + result.sessionId, 'color: #00ff41; font-weight: bold');
+
+      // Now start the countdown
+      self.state = GameState.INSTRUCTIONS;
+      self.countdown = 5;
+      self.countdownTimer = Date.now();
+    }).catch(function(err) {
+      self._startingGame = false;
+      self._walletStatus = 'start_game failed: ' + err.message;
+      console.log('%c[Game] start_game failed: ' + err.message, 'color: #ff0000');
     });
   }
 
@@ -916,15 +954,17 @@ class Game {
     }
 
     this._zkSubmitting = true;
-    this._zkSubmitMessage = 'Signing TX 1/2 (start_game)...';
+    this._zkSubmitMessage = 'Signing end_game TX...';
     this._zkSubmitTime = Date.now();
 
     // Use lootData from the proof result — these are the real Poseidon2-computed values
     var lootData = this._zkProofResult.lootData;
     lootData.score = this.hud.score;
 
-    // Wallet already connected at title screen — submit directly
-    window.StellarWallet.submitLootResult(
+    // Call end_game with the session ID from start_game
+    var sessionId = self._stellarSessionId || 0;
+    window.StellarWallet.endGame(
+      sessionId,
       self._zkProofResult,
       lootData
     ).then(function(result) {

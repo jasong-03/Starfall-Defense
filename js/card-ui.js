@@ -8,8 +8,8 @@ class CardRevealUI {
     this.card = null;
     this.revealProgress = 0; // 0 = face down, 1 = fully revealed
     this.startTime = 0;
-    this.flipDuration = 800; // ms for flip animation
-    this.holdDuration = 2500; // ms to show card before auto-dismiss
+    this.flipDuration = 1200; // ms for flip animation
+    this.holdDuration = 5000; // ms to show card before auto-dismiss
     this.phase = 'idle'; // idle, flipping, showing, done
   }
 
