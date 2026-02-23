@@ -315,7 +315,7 @@ class Game {
   _startNewGame() {
     var self = this;
     this.hud.wave = 1;
-    var seed = this._pendingSeed || (Date.now() & 0xFFFFFFFF);
+    var seed = this._pendingSeed || (Date.now() >>> 0);
     this._pendingSeed = null;
     this.rng = new SeededRandom(seed);
     this.logger.reset();
@@ -841,7 +841,7 @@ class Game {
     this._walletStatus = 'Signing start_game TX...';
 
     // Generate seed early so we can commit it on-chain
-    var seed = Date.now() & 0xFFFFFFFF;
+    var seed = Date.now() >>> 0;
     this._pendingSeed = seed;
 
     // Use a placeholder commitment (real Poseidon2 is computed at proof time)
